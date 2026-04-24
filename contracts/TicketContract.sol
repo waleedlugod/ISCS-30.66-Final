@@ -8,7 +8,13 @@ contract TicketContract {
     address public organizer;
     uint public transferFee;
 
-    mapping(uint => address) public ticketOwner;
+    struct Ticket {
+        address owner;
+        uint purchaseTimestamp;
+        uint lastTransferTimestamp;
+    }
+
+    mapping(uint => Ticket) public ticketOwner;
 
     string public eventName;
     uint public eventDate;
