@@ -13,6 +13,9 @@ contract TicketContract {
     string public eventName;
     uint public eventDate;
     uint public ticketPrice;
+    uint public maxTickets;
+    uint public soldTickets;
+
     uint private ticketIDCounter;
 
     enum Status { OPEN, SOLD_OUT }
@@ -24,22 +27,31 @@ contract TicketContract {
         _;
     }
 
-    constructor (address _organizer, string memory _eventName, uint _eventDate, uint _ticketPrice){
+    constructor (address _organizer, string memory _eventName, uint _eventDate, uint _ticketPrice, uint _maxTickets){
         parentContract = msg.sender;
         organizer = _organizer;
         eventName = _eventName;
         eventDate = _eventDate;
         ticketPrice = _ticketPrice;
+        maxTickets = _maxTickets;
         status = Status.OPEN;
         ticketIDCounter = 0;
+        soldTickets = 0;
         transferFee = 100 wei;
     }
 
     function buyTicket() public payable returns (uint) {
-        require(msg.value == ticketPrice, "Not correct payment amount!");
         require(status == Status.OPEN, "Ticket sales are closed!");
+        require(msg.value == ticketPrice, "Not correct payment amount!");
+        require(soldTickets < maxTickets, "All tickets have been sold!");
+
         uint ticketID = createTicketID();
         ticketOwner[ticketID] = msg.sender;
+
+        soldTickets++;
+        if (soldTickets == maxTickets){
+            status == Status.SOLD_OUT;
+        }
         return ticketID;
     }
 
