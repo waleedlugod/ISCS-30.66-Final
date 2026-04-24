@@ -8,7 +8,13 @@ contract TicketContract {
     address public organizer;
     uint public transferFee;
 
-    mapping(uint => address) public ticketOwner;
+    struct Ticket {
+        address owner;
+        uint purchaseTimestamp;
+        uint lastTransferTimestamp;
+    }
+
+    mapping(uint => Ticket) public ticketOwner;
 
     string public eventName;
     uint public eventDate;
@@ -20,7 +26,7 @@ contract TicketContract {
 
 
     modifier onlyTicketOwner(uint _ticketID){
-        require(ticketOwner[_ticketID] == msg.sender, "You are not the ticket owner!");
+        require(ticketOwner[_ticketID].owner == msg.sender, "You are not the ticket owner!");
         _;
     }
 
@@ -38,13 +44,20 @@ contract TicketContract {
     function buyTicket() public payable returns (uint) {
         require(msg.value == ticketPrice, "Not correct payment amount!");
         uint ticketID = createTicketID();
-        ticketOwner[ticketID] = msg.sender;
+
+        ticketOwner[ticketID] = Ticket({
+            owner: msg.sender,
+            purchaseTimestamp: block.timestamp,
+            lastTransferTimestamp: block.timestamp
+        });
+
         return ticketID;
     }
 
     function transferTicket(uint _ticketID, address _to) public payable onlyTicketOwner(_ticketID) {
         require(msg.value == transferFee, "Not correct transfer fee payment!");
-        ticketOwner[_ticketID] = _to;
+        ticketOwner[_ticketID].owner = _to;
+        ticketOwner[_ticketID].lastTransferTimestamp = block.timestamp;
     }
 
     function createTicketID() private returns (uint) {
