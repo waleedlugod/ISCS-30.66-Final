@@ -18,14 +18,18 @@ contract TicketContract {
 
     uint private ticketIDCounter;
 
-    enum Status { OPEN, SOLD_OUT }
+    enum Status { OPEN, SOLD_OUT, CLOSED }
     Status public status;
-
 
     modifier onlyTicketOwner(uint _ticketID){
         require(ticketOwner[_ticketID] == msg.sender, "You are not the ticket owner!");
         _;
     }
+
+    modifier onlyOrganizer() {
+        require(msg.sender == organizer, "You are not the organizer!");
+        _;
+    }   
 
     constructor (address _organizer, string memory _eventName, uint _eventDate, uint _ticketPrice, uint _maxTickets){
         parentContract = msg.sender;
@@ -34,6 +38,7 @@ contract TicketContract {
         eventDate = _eventDate;
         ticketPrice = _ticketPrice;
         maxTickets = _maxTickets;
+
         status = Status.OPEN;
         ticketIDCounter = 0;
         soldTickets = 0;
@@ -50,12 +55,13 @@ contract TicketContract {
 
         soldTickets++;
         if (soldTickets == maxTickets){
-            status == Status.SOLD_OUT;
+            status = Status.SOLD_OUT;
         }
         return ticketID;
     }
 
     function transferTicket(uint _ticketID, address _to) public payable onlyTicketOwner(_ticketID) {
+        require(status != Status.CLOSED, "Event is closed");
         require(msg.value == transferFee, "Not correct transfer fee payment!");
         ticketOwner[_ticketID] = _to;
     }
@@ -63,6 +69,12 @@ contract TicketContract {
     function createTicketID() private returns (uint) {
         return ticketIDCounter++;
     }
+
+    function closeEvent() public onlyOrganizer {
+        require(status == Status.OPEN, "Event already closed.");
+        status = Status.CLOSED;
+    }
+
 }
 
 

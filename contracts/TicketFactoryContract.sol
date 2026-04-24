@@ -10,8 +10,8 @@ contract TicketFactoryContract{
 
     receive() external  payable { }
 
-    function createEvent(string memory _eventName, uint _eventDate, uint _ticketPrice) public {
-        TicketContract newEvent = new TicketContract(msg.sender, _eventName, _eventDate, _ticketPrice);
+    function createEvent(string memory _eventName, uint _eventDate, uint _ticketPrice, uint _maxTickets) public {
+        TicketContract newEvent = new TicketContract(msg.sender, _eventName, _eventDate, _ticketPrice, _maxTickets);
         deployedEvents.push(newEvent);
     }
 
