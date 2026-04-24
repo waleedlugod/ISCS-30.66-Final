@@ -6,6 +6,7 @@ contract TicketContract {
 
     address parentContract;
     address public organizer;
+    uint public transferFee;
 
     mapping(uint => address) public ticketOwner;
 
@@ -15,6 +16,8 @@ contract TicketContract {
 
     enum Status { OPEN, SOLD_OUT }
     Status public status;
+
+    uint private ticketIDCounter;
 
 
     modifier onlyTicketOwner(uint _ticketID){
@@ -29,8 +32,25 @@ contract TicketContract {
         eventDate = _eventDate;
         ticketPrice = _ticketPrice;
         status = Status.OPEN;
+        ticketIDCounter = 0;
+        transferFee = 100 wei;
     }
 
+    function buyTicket() public payable returns (uint) {
+        require(msg.value == ticketPrice, "Not correct payment amount!");
+        uint ticketID = createTicketID();
+        ticketOwner[ticketID] = msg.sender;
+        return ticketID;
+    }
+
+    function transferTicket(uint _ticketID, address _to) public payable onlyTicketOwner(_ticketID) {
+        require(msg.value == transferFee, "Not correct transfer fee payment!");
+        ticketOwner[_ticketID] = _to;
+    }
+
+    function createTicketID() private returns (uint) {
+        return ticketIDCounter++;
+    }
 }
 
 

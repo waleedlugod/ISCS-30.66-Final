@@ -15,4 +15,7 @@ contract TicketFactoryContract{
         deployedEvents.push(newEvent);
     }
 
+    function getEvents() public view returns (TicketContract[] memory) {
+        return deployedEvents;
+    }
 }
