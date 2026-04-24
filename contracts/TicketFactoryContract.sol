@@ -6,6 +6,12 @@ import "contracts/TicketContract.sol";
 
 contract TicketFactoryContract{
 
+    address factoryOwner;
+
+    constructor() {
+        factoryOwner = msg.sender; // The person who deployed the factory
+    }
+
     TicketContract[] private deployedEvents;
 
     address public factoryOwner;
@@ -33,5 +39,17 @@ contract TicketFactoryContract{
 
     function getEvents() public view returns (TicketContract[] memory) {
         return deployedEvents;
+    }
+    
+    // Allow the factory owner to withdraw funds from factory contract
+    function withdrawFactoryFunds() public {
+        require(msg.sender == factoryOwner, "Only the factory owner can do this");
+        
+        uint256 amount = address(this).balance;
+        require(amount > 0, "Nothing to withdraw");
+
+        // This is the modern standard syntax
+        (bool success, ) = payable(factoryOwner).call{value: amount}("");
+        require(success, "Transfer failed");
     }
 }
