@@ -57,7 +57,11 @@ contract TicketContract {
         require(soldTickets < maxTickets, "All tickets have been sold!");
 
         uint ticketID = createTicketID();
-        ticketOwner[ticketID] = msg.sender;
+        ticketOwner[ticketID] = Ticket({
+            owner: msg.sender,
+            purchaseTimestamp: block.timestamp,
+            lastTransferTimestamp: block.timestamp
+        });
 
         soldTickets++;
         if (soldTickets == maxTickets){
