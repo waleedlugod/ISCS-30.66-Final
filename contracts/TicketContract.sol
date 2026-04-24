@@ -13,11 +13,10 @@ contract TicketContract {
     string public eventName;
     uint public eventDate;
     uint public ticketPrice;
+    uint private ticketIDCounter;
 
     enum Status { OPEN, SOLD_OUT }
     Status public status;
-
-    uint private ticketIDCounter;
 
 
     modifier onlyTicketOwner(uint _ticketID){
