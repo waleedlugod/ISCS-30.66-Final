@@ -22,7 +22,7 @@ contract TicketContract {
     uint public maxTickets;
     uint public soldTickets;
 
-    uint private ticketIDCounter;
+    uint public ticketIDCounter;
 
     enum Status { OPEN, SOLD_OUT, CLOSED }
     Status public status;
@@ -73,6 +73,13 @@ contract TicketContract {
     function transferTicket(uint _ticketID, address _to) public payable onlyTicketOwner(_ticketID) {
         require(status != Status.CLOSED, "Event is closed");
         require(msg.value == transferFee, "Not correct transfer fee payment!");
+        require(_to != address(0), "Cannot transfer to zero address");
+        require(_to != msg.sender, "Cannot transfer to yourself");
+
+        // Send transfer fee directly to the organizer
+        (bool success, ) = payable(organizer).call{value: msg.value}("");
+        require(success, "Fee transfer failed");
+
         ticketOwner[_ticketID].owner = _to;
         ticketOwner[_ticketID].lastTransferTimestamp = block.timestamp;
     }
@@ -84,6 +91,14 @@ contract TicketContract {
     function closeEvent() public onlyOrganizer {
         require(status == Status.OPEN, "Event already closed.");
         status = Status.CLOSED;
+    }
+
+    // Allow the organizer to withdraw funds from this event TicketContract
+    function withdrawFunds() public onlyOrganizer {
+        uint balance = address(this).balance;
+        require(balance > 0, "No funds to withdraw");
+        (bool success, ) = payable(organizer).call{value: balance}("");
+        require(success, "Transfer failed");
     }
 
 }
