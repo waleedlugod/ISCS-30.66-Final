@@ -37,6 +37,7 @@ contract TicketContract {
 
     function buyTicket() public payable returns (uint) {
         require(msg.value == ticketPrice, "Not correct payment amount!");
+        require(status == Status.OPEN, "Ticket sales are closed!");
         uint ticketID = createTicketID();
         ticketOwner[ticketID] = msg.sender;
         return ticketID;
