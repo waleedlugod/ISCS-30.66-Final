@@ -6,7 +6,7 @@ import "contracts/TicketContract.sol";
 
 contract TicketFactoryContract{
 
-    address factoryOwner;
+    address public factoryOwner;
 
     constructor() {
         factoryOwner = msg.sender; // The person who deployed the factory
@@ -14,13 +14,8 @@ contract TicketFactoryContract{
 
     TicketContract[] private deployedEvents;
 
-    address public factoryOwner;
 
     receive() external  payable { }
-
-    constructor() {
-        factoryOwner = msg.sender;
-    }
 
     modifier onlyFactoryOwner(){
         require(msg.sender == factoryOwner, "Not factory owner");
